@@ -4,7 +4,7 @@ import string
 import numpy as np
 from collections import Counter
 
-# (Caesar Cipher)
+# ------------------- Caesar Cipher -------------------
 def caesar_encrypt(text, shift, encrypt=True):
     if shift > 26:
         return "Error!"
@@ -38,7 +38,7 @@ def caesar_decrypt_brute_force(ciphertext):
         decrypted_text = caesar_encrypt(ciphertext, shift, encrypt=False)
         print(f"Shift {shift}: {decrypted_text}")
 
-# Vigenere Cipher)
+# ------------------- Vigenere Cipher -------------------
 def vigenere(text, key, encrypt=True):
     result = ""
     key = key.lower()
@@ -72,22 +72,48 @@ def vigenere(text, key, encrypt=True):
     
     return result  
 
-# Monoalphabetic Cipher Encryption
+def vigenere_brute_force(ciphertext, key_length):
+    possible_keys = [''.join(p) for p in itertools.product("abcdefghijklmnopqrstuvwxyz", repeat=key_length)]
+    print("\nAttempting to decrypt with all possible keys of length", key_length)
+    
+    for key in possible_keys[:10000000000000]:  
+        decrypted_text = vigenere(ciphertext, key, encrypt=False)
+        print(f"Key '{key}': {decrypted_text}")
 
+# ------------------- Monoalphabetic Cipher -------------------
 def monoalphabetic_encrypt(text, key):
     alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     key_map = {alphabet[i]: key[i] for i in range(len(alphabet))}
     result = "".join(key_map.get(char.upper(), char).lower() if char.islower() else key_map.get(char, char) for char in text)
     return result
 
-# Monoalphabetic Cipher Decryption
 def monoalphabetic_decrypt(ciphertext, key):
     alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     key_map = {key[i]: alphabet[i] for i in range(len(alphabet))}
-    result = "".join(key_map.get(char.upper(), char).lower() if char.islower() else key_map.get(char, char) for char in ciphertext)
+    result = "".join(key_map.get(char.upper(), char).lower() if char.islower() else key_map.get(char.upper(), char) for char in ciphertext)
     return result
 
-# Distributing the most common letters in the English language
+def monoalphabetic_brute_force(ciphertext, max_attempts=1000000000000):
+    print("Starting brute force... (This is impractical for monoalphabetic ciphers!)\n")
+    
+    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    permutations = itertools.permutations(alphabet)
+    
+    attempts = 0
+    for perm in permutations:
+        key = ''.join(perm)
+        
+        decrypted_text = monoalphabetic_decrypt(ciphertext, key)
+        
+        print(f"Key {key}: {decrypted_text}")  
+        
+        attempts += 1
+        if attempts >= max_attempts:
+            break
+    
+    print(f"\nTried {attempts} keys (limited for demo).")
+
+# ------------------- Frequency Analysis -------------------
 ENGLISH_FREQ_ORDER = "ETAOINSHRDLCUMWFGYPBVKJXQZ"
 def frequency_analysis_decrypt(ciphertext):
     alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -97,8 +123,7 @@ def frequency_analysis_decrypt(ciphertext):
     decrypted_text = "".join(guessed_key.get(char.upper(), char).lower() if char.islower() else guessed_key.get(char.upper(), char) for char in ciphertext)
     return decrypted_text
 
-
-# Playfair Cipher
+# ------------------- Playfair Cipher -------------------
 def create_playfair_matrix(keyword):
     alphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ"
     keyword = "".join(dict.fromkeys(keyword.upper().replace("J", "I")))
@@ -155,44 +180,73 @@ def playfair_encrypt(plaintext, keyword):
 def playfair_decrypt(ciphertext, keyword):
     matrix = create_playfair_matrix(keyword)
     return playfair_cipher(ciphertext, matrix, mode=-1)
+
+
 # (Main Menu)
 print("Choose the type of algorithm:")    
 print(" 1- Caesar ")
-print(" 2- Vigenere")
-print(" 3- Monoalphabetic")
-print(" 4- Frequency Analysis")
-print(" 5- Playfair Cipher")
-
+print(" 2- Vigenere & Related Options")
 choice = input("Enter your number: ")
 text = input("Enter your text: ")
 
 if choice == "1":
-    shift = int(input("Enter shift: "))
-    operation = input("Encrypt (E) or Decrypt (D)? ").upper()
-    result = caesar_encrypt(text, shift, encrypt=(operation == "E"))
-    print("Result:", result)
+    operation = input("Choose (E) for encryption or (D) to decode the encryption: ").upper()
+    choice_shift = input("Do you know the number of shifts? (y/n): ").lower()
+    
+    if choice_shift == "n":
+        caesar_decrypt_brute_force(text)  
+    elif choice_shift == "y":
+        shift = int(input("Enter number of shifts: "))
+        result = caesar_encrypt(text, shift, encrypt=(operation == "E"))
+        print("Result:", result)
+    else:
+        print("Please enter 'y' or 'n'.")
 
 elif choice == "2":
-    key = input("Enter the key: ")
-    operation = input("Encrypt (E) or Decrypt (D)? ").upper()
-    result = vigenere(text, key, encrypt=(operation == "E"))
-    print("Result:", result)
+    print("\n=== Vigenere & Related Options ===")
+    print(" 1- Monoalphabetic Cipher & Analysis")
+    print(" 2- Frequency Analysis (Quick decrypt)")
+    print(" 3- Playfair Cipher")
 
-elif choice == "3":
-    key = input("Enter substitution key (26 letters): ")
-    operation = input("Encrypt (E) or Decrypt (D)? ").upper()
-    result = monoalphabetic_encrypt(text, key) if operation == "E" else monoalphabetic_decrypt(text, key)
-    print("Result:", result)
+    sub_choice = input("Select an option from 1 to 3: ")
 
-elif choice == "4":
-    result = frequency_analysis_decrypt(text)
-    print("Decrypted text (frequency analysis):", result)
+    if sub_choice == "1":
+        print("\nYou chose Monoalphabetic Cipher options!")
+        print("1 - Encrypt/Decrypt with known key")
+        print("2 - Brute Force Attack on Monoalphabetic Cipher")
+        print("3 - Cryptanalysis using Frequency Analysis")
+        sub_option = input("Select an option: ")
 
-elif choice == "5":
-    keyword = input("Enter Playfair keyword: ")
-    operation = input("Encrypt (E) or Decrypt (D)? ").upper()
-    result = playfair_encrypt(text, keyword) if operation == "E" else playfair_decrypt(text, keyword)
-    print("Result:", result)
+        if sub_option == "1":
+            key = input("Enter substitution key (26 letters): ")
+            operation = input("Encrypt (E) or Decrypt (D)? ").upper()
+            result = monoalphabetic_encrypt(text, key) if operation == "E" else monoalphabetic_decrypt(text, key)
+            print("Result:", result)
+
+        elif sub_option == "2":
+            monoalphabetic_brute_force(text)
+
+        elif sub_option == "3":
+            result = frequency_analysis_decrypt(text)
+            print("Decrypted text (frequency analysis):", result)
+
+        else:
+            print("Invalid choice!")
+
+    elif sub_choice == "2":
+        print("Running Frequency Analysis (Quick decrypt)...")
+        result = frequency_analysis_decrypt(text)
+        print("Decrypted text (frequency analysis):", result)
+
+    elif sub_choice == "3":
+        keyword = input("Enter Playfair keyword: ")
+        operation = input("Encrypt (E) or Decrypt (D)? ").upper()
+        result = playfair_encrypt(text, keyword) if operation == "E" else playfair_decrypt(text, keyword)
+        print("Result:", result)
+
+    else:
+        print("Invalid option in Vigenere & Related Options!")
+
 
 else:
     print("Invalid choice!")
