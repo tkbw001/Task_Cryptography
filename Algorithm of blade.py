@@ -72,6 +72,7 @@ def vigenere(text, key, encrypt=True):
     
     return result  
 
+
 def vigenere_brute_force(ciphertext, key_length):
     possible_keys = [''.join(p) for p in itertools.product("abcdefghijklmnopqrstuvwxyz", repeat=key_length)]
     print("\nAttempting to decrypt with all possible keys of length", key_length)
@@ -181,7 +182,6 @@ def playfair_decrypt(ciphertext, keyword):
     matrix = create_playfair_matrix(keyword)
     return playfair_cipher(ciphertext, matrix, mode=-1)
 
-
 # (Main Menu)
 print("Choose the type of algorithm:")    
 print(" 1- Caesar ")
@@ -207,8 +207,9 @@ elif choice == "2":
     print(" 1- Monoalphabetic Cipher & Analysis")
     print(" 2- Frequency Analysis (Quick decrypt)")
     print(" 3- Playfair Cipher")
+    print(" 4- Vigenere Cipher (Encrypt/Decrypt)")  
 
-    sub_choice = input("Select an option from 1 to 3: ")
+    sub_choice = input("Select an option from 1 to 4: ")
 
     if sub_choice == "1":
         print("\nYou chose Monoalphabetic Cipher options!")
@@ -222,14 +223,11 @@ elif choice == "2":
             operation = input("Encrypt (E) or Decrypt (D)? ").upper()
             result = monoalphabetic_encrypt(text, key) if operation == "E" else monoalphabetic_decrypt(text, key)
             print("Result:", result)
-
         elif sub_option == "2":
             monoalphabetic_brute_force(text)
-
         elif sub_option == "3":
             result = frequency_analysis_decrypt(text)
             print("Decrypted text (frequency analysis):", result)
-
         else:
             print("Invalid choice!")
 
@@ -244,9 +242,21 @@ elif choice == "2":
         result = playfair_encrypt(text, keyword) if operation == "E" else playfair_decrypt(text, keyword)
         print("Result:", result)
 
+    elif sub_choice == "4":  
+        key = input("Enter Vigenere key: ")
+        operation = input("Encrypt (E) or Decrypt (D)? ").upper()
+        
+        if operation == "E":
+            result = vigenere(text, key, encrypt=True)  
+            print("🔒 Encrypted text:", result)
+        elif operation == "D":
+            result = vigenere(text, key, encrypt=False)  
+            print("🔓 Decrypted text:", result)
+        else:
+            print("Invalid choice! Please enter 'E' or 'D'.")
+    
     else:
         print("Invalid option in Vigenere & Related Options!")
-
 
 else:
     print("Invalid choice!")
